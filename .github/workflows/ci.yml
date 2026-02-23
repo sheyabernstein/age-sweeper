@@ -33,4 +33,4 @@ jobs:
           allow-prereleases: true
       - run: pip install poetry
       - run: poetry install
-      - run: poetry run pytest -v --cov
+      - run: poetry run pytest

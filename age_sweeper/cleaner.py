@@ -52,6 +52,9 @@ def _remove_empty_dirs(target_dir: Path, dry_run: bool, stats: Stats) -> None:
     for dirpath in sorted(target_dir.rglob("*"), reverse=True):
         if not dirpath.is_dir():
             continue
+        if dirpath.parent == target_dir:
+            log.debug("ignoring top-level dir %s", dirpath)
+            continue
         try:
             if any(dirpath.iterdir()):
                 continue
