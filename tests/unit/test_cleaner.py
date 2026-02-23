@@ -72,7 +72,7 @@ def test_permission_error(tmp_path):
     os.chmod(tmp_path, 0o755)
 
 
-def test_removes_empty_dirs(tmp_path):
+def test_keeps_top_level_dirs(tmp_path):
     sub = tmp_path / "subdir"
     sub.mkdir()
     _make_old_file(sub / "old.txt")
@@ -88,8 +88,29 @@ def test_removes_empty_dirs(tmp_path):
     stats = clean(config)
 
     assert stats.deleted == 1
+    assert stats.dirs_removed == 0
+    assert sub.exists()
+
+
+def test_removes_nested_empty_dirs(tmp_path):
+    nested = tmp_path / "subdir" / "nested"
+    nested.mkdir(parents=True)
+    _make_old_file(nested / "old.txt")
+
+    config = Config(
+        target_dir=tmp_path,
+        retention=timedelta(days=5),
+        dry_run=False,
+        recursive=True,
+        clean_empty_dirs=True,
+        log_level="DEBUG",
+    )
+    stats = clean(config)
+
+    assert stats.deleted == 1
     assert stats.dirs_removed == 1
-    assert not sub.exists()
+    assert not nested.exists()
+    assert (tmp_path / "subdir").exists()
 
 
 def test_keeps_nonempty_dirs(tmp_path):

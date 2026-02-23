@@ -65,7 +65,7 @@ def test_dry_run_keeps_files():
 
 
 @pytest.mark.e2e
-def test_removes_empty_dirs():
+def test_keeps_top_level_dirs():
     with tempfile.TemporaryDirectory() as tmpdir:
         subdir = os.path.join(tmpdir, "subdir")
         os.makedirs(subdir)
@@ -73,7 +73,22 @@ def test_removes_empty_dirs():
 
         result = _run({"TARGET_DIR": "/data", "RETENTION": "5d"}, tmpdir)
         assert result.returncode == 0
-        assert not os.path.exists(subdir)
+        assert os.path.exists(subdir)
+        assert not os.path.exists(os.path.join(subdir, "old.txt"))
+        assert "empty dir" not in result.stderr.lower()
+
+
+@pytest.mark.e2e
+def test_removes_nested_empty_dirs():
+    with tempfile.TemporaryDirectory() as tmpdir:
+        nested = os.path.join(tmpdir, "subdir", "nested")
+        os.makedirs(nested)
+        _make_old_file(os.path.join(nested, "old.txt"))
+
+        result = _run({"TARGET_DIR": "/data", "RETENTION": "5d"}, tmpdir)
+        assert result.returncode == 0
+        assert os.path.exists(os.path.join(tmpdir, "subdir"))
+        assert not os.path.exists(nested)
         assert "empty dir" in result.stderr.lower()
 
 
