@@ -1,0 +1,38 @@
+[project]
+name = "age-sweeper"
+version = "0.1.0"
+description = "File garbage collector based on age — designed for Kubernetes CronJobs"
+requires-python = ">=3.14"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry]
+packages = [{ include = "age_sweeper" }]
+
+[tool.poetry.scripts]
+age-sweeper = "age_sweeper.__main__:main"
+
+[tool.poetry.group.dev.dependencies]
+ruff = ">=0.9"
+pytest = ">=8"
+pytest-cov = ">=6"
+black = "^26.1.0"
+
+[tool.ruff]
+target-version = "py314"
+line-length = 100
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP"]
+
+[tool.black]
+line-length = 100
+target-version = ["py314"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+markers = [
+    "e2e: end-to-end tests requiring Docker",
+]
