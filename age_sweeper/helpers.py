@@ -13,13 +13,14 @@ def get_env_bool(name: str, default: bool) -> bool:
     return raw in {"true", "1", "yes"}
 
 
-def format_bytes(num_bytes: int) -> str:
+def format_bytes(num_bytes: int | float) -> str:
     """Convert bytes to human-readable IEC format (B, KiB, MiB, GiB, etc.)."""
+    value: float = num_bytes
     for unit in ("B", "KiB", "MiB", "GiB", "TiB"):
-        if num_bytes < 1024:
-            return f"{num_bytes:g}{unit}"
-        num_bytes /= 1024
-    return f"{num_bytes:g}PiB"
+        if value < 1024:
+            return f"{value:.2f}".rstrip("0").rstrip(".") + unit
+        value /= 1024
+    return f"{value:.2f}".rstrip("0").rstrip(".") + "PiB"
 
 
 def format_age(seconds: float) -> str:
