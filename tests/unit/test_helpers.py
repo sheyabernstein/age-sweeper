@@ -1,6 +1,6 @@
 import pytest
 
-from age_sweeper.helpers import get_env_bool
+from age_sweeper.helpers import format_age, format_bytes, get_env_bool
 
 
 @pytest.mark.parametrize(
@@ -35,3 +35,41 @@ def test_get_env_bool(monkeypatch, env_val: str, default: bool, expected: bool):
     else:
         monkeypatch.delenv("TEST_BOOL", raising=False)
     assert get_env_bool("TEST_BOOL", default=default) is expected
+
+
+@pytest.mark.parametrize(
+    ("num_bytes", "expected"),
+    [
+        (0, "0B"),
+        (1, "1B"),
+        (512, "512B"),
+        (1024, "1KB"),
+        (1536, "1.5KB"),
+        (1024**2, "1MB"),
+        (1024**2 * 5 + 1024 * 256, "5.25MB"),
+        (1024**3, "1GB"),
+        (1024**4, "1TB"),
+        (1024**5, "1PB"),
+    ],
+)
+def test_format_bytes(num_bytes, expected):
+    assert format_bytes(num_bytes) == expected
+
+
+@pytest.mark.parametrize(
+    ("seconds", "expected"),
+    [
+        (0, "0s"),
+        (30, "30s"),
+        (60, "1m"),
+        (90, "1m30s"),
+        (3600, "1h"),
+        (3661, "1h1m1s"),
+        (86400, "1d"),
+        (86400 * 3 + 3600 * 2, "3d2h"),
+        (86400 * 10, "10d"),
+        (86400 + 60 * 5, "1d5m"),
+    ],
+)
+def test_format_age(seconds, expected):
+    assert format_age(seconds) == expected

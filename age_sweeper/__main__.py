@@ -2,6 +2,7 @@ import logging
 
 from age_sweeper.cleaner import clean
 from age_sweeper.config import load_config
+from age_sweeper.helpers import format_bytes
 
 
 def main() -> None:
@@ -23,13 +24,13 @@ def main() -> None:
     stats = clean(config)
 
     log.info(
-        "done: scanned=%d matched=%d deleted=%d dirs_removed=%d errors=%d bytes_freed=%d",
+        "done: scanned=%d matched=%d deleted=%d dirs_removed=%d errors=%d bytes_freed=%s",
         stats.scanned,
         stats.matched,
         stats.deleted,
         stats.dirs_removed,
         stats.errors,
-        stats.bytes_freed,
+        format_bytes(stats.bytes_freed),
     )
 
 
