@@ -1,4 +1,8 @@
+import re
+
 import pytest
+from hypothesis import given
+from hypothesis import strategies as st
 
 from age_sweeper.helpers import format_age, format_bytes, get_env_bool
 
@@ -73,3 +77,28 @@ def test_format_bytes(num_bytes, expected):
 )
 def test_format_age(seconds, expected):
     assert format_age(seconds) == expected
+
+
+# --- hypothesis property-based tests ---
+
+_IEC_SUFFIXES = {"B", "KiB", "MiB", "GiB", "TiB", "PiB"}
+_SUFFIX_RE = re.compile(r"^[\d.]+(.+)$")
+
+
+@given(n=st.integers(min_value=0, max_value=2**63))
+def test_hypothesis_format_bytes(n):
+    result = format_bytes(n)
+    m = _SUFFIX_RE.match(result)
+    assert m, f"unexpected format_bytes output: {result!r}"
+    assert m.group(1) in _IEC_SUFFIXES
+    # numeric prefix is parseable
+    float(result[: m.start(1)])
+
+
+_AGE_RE = re.compile(r"^(\d+[dhms])+$")
+
+
+@given(n=st.integers(min_value=0, max_value=10**8))
+def test_hypothesis_format_age(n):
+    result = format_age(n)
+    assert result == "0s" or _AGE_RE.match(result), f"unexpected format_age output: {result!r}"
