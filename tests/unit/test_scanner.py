@@ -26,7 +26,7 @@ def test_scan_non_recursive_skips_subdirs(tmp_path):
     (sub / "b.txt").touch()
     files = list(scan(tmp_path, recursive=False))
     assert len(files) == 1
-    assert files[0].name == "a.txt"
+    assert files[0].path.name == "a.txt"
 
 
 def test_is_expired(tmp_path):
