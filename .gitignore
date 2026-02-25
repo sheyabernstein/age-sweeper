@@ -9,6 +9,7 @@ build/
 .venv/
 .env
 .pytest_cache/
+.hypothesis/
 .ruff_cache/
 htmlcov/
 .coverage

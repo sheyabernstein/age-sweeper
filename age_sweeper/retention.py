@@ -1,7 +1,7 @@
 import re
 from datetime import timedelta
 
-_PATTERN = re.compile(r"^(\d+)(m|h|d|w)$")
+_TOKEN = re.compile(r"(\d+)(w|d|h|m)")
 
 _UNITS: dict[str, str] = {
     "m": "minutes",
@@ -12,11 +12,22 @@ _UNITS: dict[str, str] = {
 
 
 def parse_retention(value: str) -> timedelta:
-    match = _PATTERN.match(value.strip())
-    if not match:
+    text = value.strip()
+    tokens = _TOKEN.findall(text)
+    if not tokens:
         raise ValueError(
-            f"invalid retention format {value!r}, expected <number><unit> where unit is m/h/d/w"
+            f"invalid retention format {value!r}, "
+            "expected compound duration like '7d', '3h30m', or '1w2d6h'"
         )
-    amount = int(match.group(1))
-    unit = _UNITS[match.group(2)]
-    return timedelta(**{unit: amount})
+    # Reject if there are characters not covered by the matched tokens
+    consumed = "".join(amount + unit for amount, unit in tokens)
+    if consumed != text:
+        raise ValueError(
+            f"invalid retention format {value!r}, "
+            "expected compound duration like '7d', '3h30m', or '1w2d6h'"
+        )
+    kwargs: dict[str, int] = {}
+    for amount, unit in tokens:
+        key = _UNITS[unit]
+        kwargs[key] = kwargs.get(key, 0) + int(amount)
+    return timedelta(**kwargs)
