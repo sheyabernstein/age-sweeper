@@ -11,7 +11,21 @@ _UNITS: dict[str, str] = {
 }
 
 
-def parse_retention(value: str) -> timedelta:
+class RetentionDelta(timedelta):
+    """A timedelta subclass that supports string representation in human-readable format."""
+
+    retention_str: str = ""
+
+    def __new__(cls, retention_str: str = "", **kwargs):
+        self = super().__new__(cls, **kwargs)
+        self.retention_str = retention_str
+        return self
+
+    def __str__(self):
+        return self.retention_str
+
+
+def parse_retention(value: str) -> RetentionDelta:
     text = value.strip()
     tokens = _TOKEN.findall(text)
     if not tokens:
@@ -30,4 +44,4 @@ def parse_retention(value: str) -> timedelta:
     for amount, unit in tokens:
         key = _UNITS[unit]
         kwargs[key] = kwargs.get(key, 0) + int(amount)
-    return timedelta(**kwargs)
+    return RetentionDelta(retention_str=text, **kwargs)

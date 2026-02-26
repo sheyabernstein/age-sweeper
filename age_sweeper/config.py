@@ -1,17 +1,16 @@
 import os
 import sys
 from dataclasses import dataclass
-from datetime import timedelta
 from pathlib import Path
 
 from age_sweeper.helpers import get_env_bool
-from age_sweeper.retention import parse_retention
+from age_sweeper.retention import RetentionDelta, parse_retention
 
 
 @dataclass(frozen=True)
 class Config:
     target_dir: Path
-    retention: timedelta
+    retention: RetentionDelta
     dry_run: bool
     recursive: bool
     clean_empty_dirs: bool
